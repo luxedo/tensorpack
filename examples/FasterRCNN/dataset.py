@@ -21,7 +21,7 @@ class COCODetection:
         'minival2014': 'val2014',
     }
 
-    COCO_id_to_category_id = {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11, 13: 12, 14: 13, 15: 14, 16: 15, 17: 16, 18: 17, 19: 18, 20: 19, 21: 20, 22: 21, 23: 22, 24: 23, 25: 24, 27: 25, 28: 26, 31: 27, 32: 28, 33: 29, 34: 30, 35: 31, 36: 32, 37: 33, 38: 34, 39: 35, 40: 36, 41: 37, 42: 38, 43: 39, 44: 40, 46: 41, 47: 42, 48: 43, 49: 44, 50: 45, 51: 46, 52: 47, 53: 48, 54: 49, 55: 50, 56: 51, 57: 52, 58: 53, 59: 54, 60: 55, 61: 56, 62: 57, 63: 58, 64: 59, 65: 60, 67: 61, 70: 62, 72: 63, 73: 64, 74: 65, 75: 66, 76: 67, 77: 68, 78: 69, 79: 70, 80: 71, 81: 72, 82: 73, 84: 74, 85: 75, 86: 76, 87: 77, 88: 78, 89: 79, 90: 80}  # noqa
+    COCO_id_to_category_id = {i: i for i in range(1, 81)}  # noqa
     """
     Mapping from the incontinuous COCO category id to an id in [1, #category]
     For your own dataset, this should usually be an identity mapping.
@@ -29,16 +29,18 @@ class COCODetection:
 
     # 80 names for COCO
     class_names = [
-        "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", "chair", "couch", "potted plant", "bed", "dining table", "toilet", "tv", "laptop", "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]  # noqa
+        "", "", "", "", "frugiperda", "armigera"
+        ]  # noqa
+    class_names += [""]*74
 
     def __init__(self, basedir, name):
         basedir = os.path.expanduser(basedir)
         self.name = name
         self._imgdir = os.path.realpath(os.path.join(
-            basedir, self._INSTANCE_TO_BASEDIR.get(name, name)))
+            basedir, "GBIF"))
         assert os.path.isdir(self._imgdir), self._imgdir
         annotation_file = os.path.join(
-            basedir, 'annotations/instances_{}.json'.format(name))
+            basedir, 'coco.json')
         assert os.path.isfile(annotation_file), annotation_file
 
         from pycocotools.coco import COCO
@@ -106,7 +108,7 @@ class COCODetection:
         Change relative filename to abosolute file name.
         """
         img['file_name'] = os.path.join(
-            self._imgdir, img['file_name'])
+            self._imgdir, "/".join(img['path'].split("/")[-2:]))
         assert os.path.isfile(img['file_name']), img['file_name']
 
     def _add_detection_gt(self, img, add_mask):
@@ -291,7 +293,7 @@ class DetectionDataset:
 
 
 if __name__ == '__main__':
-    cfg.DATA.BASEDIR = '~/data/coco'
-    c = COCODetection(cfg.DATA.BASEDIR, 'train2014')
+    cfg.DATA.BASEDIR = '~/github/job/tarvos/imagem-mariposas/dataset/scraping/'
+    c = COCODetection(cfg.DATA.BASEDIR, 'GBIF')
     roidb = c.load(add_gt=True, add_mask=True)
     print("#Images:", len(roidb))
